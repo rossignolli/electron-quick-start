@@ -1,43 +1,94 @@
-// Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
-const path = require('path')
+const {app, BrowserWindow, ipcMain, Tray, ClientRequest} = require('electron');
+const path = require('path');
+const positioner = require('electron-traywindow-positioner');
+const fetch = require('electron-fetch').default
+const  {uuid} = require('uuidv4')
+const si = require('systeminformation');
 
-function createWindow () {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
 
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+const iconPath = path.join(__dirname, 'jobicon.png')
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+let tray = undefined
+let window = undefined
+
+
+
+app.on('ready', () => {
+  createTray()
+  createWindow()
+  si.osInfo().then(data => {
+    
+    data.id = uuid()
+      const body = data
+
+      try{
+        fetch('http://localhost:3333/', { 
+          method: 'POST',
+          body:    JSON.stringify(body),
+          headers: { 'Content-Type': 'application/json' },
+      })
+          .then(res => res.json())
+          .then(json => console.log(json)).catch(err =>{
+            console.log(err)
+          })
+
+      }catch(err){
+        console.log(err)
+      }
+     
+     
+  });
+  
+})
+
+
+const createTray = () => {
+  tray = new Tray(iconPath)
+  tray.on('click', function (event) {
+    toggleWindow()
+  });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  createWindow()
-  
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+
+const createWindow = () => {
+  window = new BrowserWindow({
+    width: 320,
+    height: 450,
+    show: false,
+    frame: false,
+    fullscreenable: false,
+    resizable: true,
+    transparent: false,
+    skipTaskbar: false,
+    webPreferences: {
+      backgroundThrottling: true
+    }
   })
-})
+  window.loadURL(`file://${path.join(__dirname, 'index.html')}`)
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
+  let trayBounds = tray.getBounds()
+  positioner.position(window, trayBounds);
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+  // Hide the window when it loses focus
+  window.on('blur', () => {
+    if (!window.webContents.isDevToolsOpened()) {
+      window.hide()
+    }
+  })
+}
+
+const toggleWindow = () => {
+  window.isVisible() ? window.hide() : showWindow();
+}
+
+const showWindow = () => {
+  // const position = getWindowPosition();
+  // window.setPosition(position.x, position.y, false);
+  let trayBounds = tray.getBounds()
+  positioner.position(window, trayBounds);
+  window.show();
+}
+
+ipcMain.on('show-window', () => {
+  showWindow()
+})

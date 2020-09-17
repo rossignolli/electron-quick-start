@@ -7,6 +7,15 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   for (const type of ['chrome', 'node', 'electron']) {
+    const si = require('systeminformation');
+
+// promises style - new since version 3
+    si.osInfo()
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+    si.users()
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
     replaceText(`${type}-version`, process.versions[type])
   }
 })
