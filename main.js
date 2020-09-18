@@ -2,7 +2,7 @@ const {app, BrowserWindow, ipcMain, Tray, ClientRequest} = require('electron');
 const path = require('path');
 const positioner = require('electron-traywindow-positioner');
 const fetch = require('electron-fetch').default
-const  {uuid} = require('uuidv4')
+const { v4: uuid_v4 } = require('uuid');
 const si = require('systeminformation');
 
 
@@ -18,10 +18,9 @@ app.on('ready', () => {
   createWindow()
   si.osInfo().then(data => {
     
-    data.id = uuid()
+    data.id = uuid_v4()
       const body = data
 
-      try{
         fetch('http://localhost:3333/', { 
           method: 'POST',
           body:    JSON.stringify(body),
@@ -32,9 +31,7 @@ app.on('ready', () => {
             console.log(err)
           })
 
-      }catch(err){
-        console.log(err)
-      }
+     
      
      
   });
