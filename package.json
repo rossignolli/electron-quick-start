@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "electron-fetch": "^1.7.1",
+    "electron-store": "^6.0.1",
     "electron-traywindow-positioner": "^1.1.0",
     "systeminformation": "^4.27.0",
     "uuidv4": "^6.2.3"

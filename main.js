@@ -4,9 +4,12 @@ const positioner = require('electron-traywindow-positioner');
 const fetch = require('electron-fetch').default
 const { v4: uuid_v4 } = require('uuid');
 const si = require('systeminformation');
+const Store = require('electron-store');
 
 
 const iconPath = path.join(__dirname, 'jobicon.png')
+
+const store = new Store();
 
 let tray = undefined
 let window = undefined
@@ -16,20 +19,25 @@ let window = undefined
 app.on('ready', () => {
   createTray()
   createWindow()
+
+
+
   si.osInfo().then(data => {
     
     data.id = uuid_v4()
       const body = data
 
-        fetch('http://localhost:3333/', { 
-          method: 'POST',
-          body:    JSON.stringify(body),
-          headers: { 'Content-Type': 'application/json' },
-      })
-          .then(res => res.json())
-          .then(json => console.log(json)).catch(err =>{
-            console.log(err)
-          })
+      setInterval(function(){ console.log("Hello"); }, 3000);
+
+      //   fetch('http://localhost:3333/', { 
+      //     method: 'POST',
+      //     body:    JSON.stringify(body),
+      //     headers: { 'Content-Type': 'application/json' },
+      // })
+      //     .then(res => res.json())
+      //     .then(json => console.log(json)).catch(err =>{
+      //       console.log(err)
+      //     })
 
      
      
@@ -61,7 +69,7 @@ const createWindow = () => {
       backgroundThrottling: true
     }
   })
-  window.loadURL(`file://${path.join(__dirname, 'index.html')}`)
+  window.loadURL(`file://${path.join(__dirname, 'tray.html')}`)
 
   let trayBounds = tray.getBounds()
   positioner.position(window, trayBounds);
@@ -89,3 +97,7 @@ const showWindow = () => {
 ipcMain.on('show-window', () => {
   showWindow()
 })
+
+
+// store.set('uuid_equipament', 'aw5fa65w2f6+a54f6aw54');
+console.log(store.get('uuid_equipament2'));
